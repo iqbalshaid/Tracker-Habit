@@ -1,0 +1,12 @@
+import { updateHabit,deleteHabit,posthabit,habitgetbyUserId,habitsget, AlldeleteHabit,archieve } from "../controller/Habits.js";
+import express from "express";
+import { VerifyMiddleware } from "../Middleware/VerifyUser.js";
+const route = express.Router();
+route.get("/getHabit",VerifyMiddleware,habitsget);
+route.get("/getHabitUserId/:id",VerifyMiddleware,habitgetbyUserId);
+route.post("/postHabit",VerifyMiddleware,posthabit);
+route.put("/updateHabit/:id",VerifyMiddleware,updateHabit);
+route.delete("/deleteHabit/:id",VerifyMiddleware,deleteHabit);
+route.delete("/alldelete",VerifyMiddleware,AlldeleteHabit);
+route.patch("/archieve/:id",VerifyMiddleware,archieve);
+export default route;
