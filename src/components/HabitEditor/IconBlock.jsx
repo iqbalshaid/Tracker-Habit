@@ -20,7 +20,7 @@ function IconBlock({ habits, currentIconTitle }) {
 			key="selectedIcon"
 			type="hidden"
 			name="iconTitle"
-			id="iconTitle"
+			
 			value={selectedIcon}
 			readOnly
 		/>

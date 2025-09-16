@@ -11,6 +11,7 @@ import Button from '../Button';
 import checkHabitTitleExistence from '../../utils/checkHabitTitleExistence';
 import { MdAddToPhotos, MdDeleteForever } from 'react-icons/md';
 import { HiArchiveBoxArrowDown } from 'react-icons/hi2';
+import NameBlock from './NameBlock';
 
 function HabitEditor() {
   const location = useLocation();
@@ -30,6 +31,7 @@ function HabitEditor() {
   const habit = isEditMode ? habits.find(h => h.title === habitTitle) : null;
 
   const [inputTitle, setInputTitle] = useState(isEditMode ? habit?.title : '');
+  const [inputName,setInputName] = useState(isEditMode ? habit?.name : '')
   const [alreadyExist, setAlreadyExist] = useState(false);
   const [currOrder, setCurrOrder] = useState(() => (isEditMode ? filteredHabits.indexOf(habit) + 1 : -1));
 
@@ -37,7 +39,7 @@ function HabitEditor() {
     setAlreadyExist(
       checkHabitTitleExistence(habits, habit, inputTitle)
     );
-  }, [habit, habits, inputTitle]);
+  }, [habit, habits, inputTitle,inputName]);
   const handlePressEnter = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -55,6 +57,7 @@ function HabitEditor() {
     const formData = new FormData(e.target);
     const habitData = {
       title: inputTitle,
+      name:inputName,
       frequency: parseInt(formData.get('frequency') || '1'),
       colorIndex: parseInt(formData.get('colorIndex') || '0'),
       iconTitle: formData.get('iconTitle') || 'default',
@@ -106,6 +109,7 @@ const handleArchiveHabit = async () => {
     <div className={styles.wrapper}>
       <form className={styles.form} onSubmit={handleSubmitForm} onKeyDown={handlePressEnter}>
         <TitleBlock input={inputTitle} onChange={setInputTitle} alreadyExist={alreadyExist} />
+        <NameBlock input={inputName} onChange={setInputName} alreadyExist={alreadyExist} />
         <FrequencyBlock currentFrequency={habit?.frequency} />
         {isEditMode && <OrderBlock habitsCount={filteredHabits.length} currOrder={currOrder} setCurrOrder={setCurrOrder} />}
         <ColorBlock habits={habits} currentColorIndex={habit?.colorIndex} />
