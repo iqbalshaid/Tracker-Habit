@@ -1,21 +1,24 @@
 
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import User from "../Model/User.js";
+import { User } from "../db/dbConnection.js";
 const SignUp = async (req,res)=>{
     try{
       
     const {email,password} = req.body;
     console.log(req.body);
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ where:{email:email} });
     if (existingUser) return res.status(400).json({ message: "User already exists" });
 
     // hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 console.log("hello");
     // save new user
-    const user = new User({ email, password: hashedPassword });
-    await user.save();
+    const user = await User.create({
+      ...req.body,
+      password: hashedPassword,
+    });
+    
 
     res.status(201).json({ message: "User registered successfully" });
     }
@@ -31,7 +34,7 @@ const SignIn = async (req,res)=>{
      const{email,password} = req.body;
 
     // check user exists
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ where:{email:email} });
     if (!user) return res.status(404).json({ message: "User not found" });
 
     // compare password
@@ -40,7 +43,7 @@ const SignIn = async (req,res)=>{
 
     // generate JWT token
     const token = jwt.sign(
-      { id: user._id, email: user.email },
+      { id: user.id, email: user.email },
       process.env.JWT,
       { expiresIn: "7d" }
     );

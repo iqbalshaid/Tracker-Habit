@@ -1,16 +1,27 @@
-import mongoose from "mongoose";
+import { DataTypes } from "sequelize";
 
-// Nested schema for locale
-
-
-const UserSchema = new mongoose.Schema(
-  {
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+const createUserModel=(sequelize)=>{
+ const User=sequelize.define("User",{
+    id:{
+        type:DataTypes.INTEGER,
+        autoIncrement:true,
+        primaryKey:true
+    },
     
-  },
-  { timestamps: true }
-);
+    email:{
+        type:DataTypes.STRING,
+        allowNull:false,
+        unique:true,
+        validate:{isEmail:true}
+    },
+    password:{
+        type:DataTypes.STRING,
+        allowNull:false,
+        unique:true
+    },
+   
+ });
+ return User;
+}
 
-// Prevent OverwriteModelError
-export default mongoose.models.User || mongoose.model("User", UserSchema);
+export default createUserModel;
