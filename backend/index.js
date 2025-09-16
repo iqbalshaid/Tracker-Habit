@@ -4,9 +4,9 @@ import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import Userroute from "./Routes/Userroute.js";
-import Habitroute from "./Routes/Habitroute.js"
+import Habitroute from "./Routes/Habitroute.js";
+import { dbConnection } from "./db/dbConnection.js";
 dotenv.config();
-
 const app = express();
 app.use(express.json());
 app.use(express.static('public'))
@@ -36,6 +36,7 @@ const conect = ()=>{
 
 app.listen(PORT, () => {
     conect();
+    dbConnection("shahid","postgres","shahid");
     console.log(`Server is running on port ${PORT}`);
 });
 app.use("",Userroute);

@@ -36,6 +36,7 @@ function IconBlock({ habits, currentIconTitle }) {
 					className={styles.iconCategory}
 				>
 					<small>{dbIcons[index]}</small>
+					<small>{dbIcons[index]}</small>
 				</div>
 			);
 
