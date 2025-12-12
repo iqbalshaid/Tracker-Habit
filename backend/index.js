@@ -7,6 +7,8 @@ import Userroute from "./Routes/Userroute.js";
 import Habitroute from "./Routes/Habitroute.js";
 import { dbConnection } from "./db/dbConnection.js";
 import "./Middleware/redisClient.js"
+import chatBoat from "./Routes/chatBoat.js";
+
 dotenv.config();
 const app = express();
 app.use(express.json());
@@ -34,11 +36,14 @@ const conect = ()=>{
     })
 }
  // Call the connection function
+conect();
+dbConnection("shahid","postgres","shahid");
 
+app.use("",Userroute);
+app.use("",Habitroute);
+app.use("",chatBoat);
 app.listen(PORT, () => {
     conect();
     dbConnection("shahid","postgres","shahid");
     console.log(`Server is running on port ${PORT}`);
 });
-app.use("",Userroute);
-app.use("",Habitroute);
