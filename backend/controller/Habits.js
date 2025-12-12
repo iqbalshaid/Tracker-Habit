@@ -27,6 +27,7 @@ const posthabit = async (req, res) => {
      console.log("kio");
     const { title,name, frequency, colorIndex, iconTitle, order,isArchived,completedDays} = req.body;
   
+
     const habit = new Habits({ userId: req.user.id, title,name, frequency, colorIndex, iconTitle, order,isArchived,completedDays });
     
     await habit.save();
