@@ -1,0 +1,40 @@
+version:"3.8"
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: apnatrack-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass redis_pass --appendonly yes
+    volumes:
+      - redis_data:/data
+    environment:
+      - REDIS_PASSWORD=redis_pass
+    networks:
+      - apnatrack-network
+
+  mongo:
+    image: mongo:6
+    container_name: Tracker
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_URL: "mongodb+srv://shahidiqbal63209:Shahid786@cluster0.lbxy9hu.mongodb.net/Tracker?retryWrites=true&w=majority"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - apnatrack-network
+volumes:
+  redis_data:
+    driver: local
+  mongo:
+    driver: local
+
+networks:
+  apnatrack-network:
+    driver: bridge
+    
+ 

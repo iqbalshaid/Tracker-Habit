@@ -4,9 +4,11 @@ import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import Userroute from "./Routes/Userroute.js";
-import Habitroute from "./Routes/Habitroute.js"
+import Habitroute from "./Routes/Habitroute.js";
+import { dbConnection } from "./db/dbConnection.js";
+import "./Middleware/redisClient.js"
+import chatBoat from "./Routes/chatBoat.js";
 dotenv.config();
-
 const app = express();
 app.use(express.json());
 app.use(express.static('public'))
@@ -33,10 +35,12 @@ const conect = ()=>{
     })
 }
  // Call the connection function
+conect();
+dbConnection("shahid","postgres","shahid");
 
-app.listen(PORT, () => {
-    conect();
-    console.log(`Server is running on port ${PORT}`);
-});
 app.use("",Userroute);
 app.use("",Habitroute);
+app.use("",chatBoat);
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});

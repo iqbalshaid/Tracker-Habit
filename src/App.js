@@ -24,6 +24,7 @@ import SignInScreen from './components/SignIn';
 import SignUpScreen from './components/SignUp';
 import ResetPasswordScreen from './components/ResertPassword';
 import AuthRedirectHandler from './components/AuthRedirect';
+import Chat from './components/chatBoat';
 const PUBLIC_URL = process.env.PUBLIC_URL;
 
 function App() {
@@ -71,6 +72,10 @@ function App() {
 							<Route key={r.path} path={r.path} element={r.element} />
 						))}
 					</Route>
+					<Route
+					path = "/chatboat"
+					element = {<Chat />}
+					/>
 				</Routes>
 
 				{isDialogVisible && (

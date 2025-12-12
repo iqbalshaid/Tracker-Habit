@@ -20,7 +20,7 @@ function IconBlock({ habits, currentIconTitle }) {
 			key="selectedIcon"
 			type="hidden"
 			name="iconTitle"
-			id="iconTitle"
+			
 			value={selectedIcon}
 			readOnly
 		/>
@@ -35,6 +35,7 @@ function IconBlock({ habits, currentIconTitle }) {
 					key={dbIcons[index]}
 					className={styles.iconCategory}
 				>
+					<small>{dbIcons[index]}</small>
 					<small>{dbIcons[index]}</small>
 				</div>
 			);

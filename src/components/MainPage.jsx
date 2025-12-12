@@ -9,8 +9,8 @@ import { MdAddToPhotos, MdArrowForward, MdArrowBack } from "react-icons/md";
 import { useHabitsStore } from '../stores/habitsStore';
 import Menu from './Menu/Menu';
 import { useAuth } from '../Context/Auth-context';
-import { Navigate } from 'react-router';
-
+import { Link, Navigate } from 'react-router';
+import RobotImg from "../img/robot-chatbot-icon-sign-free-vector.jpg";
 const mainVariants = {
   initial: { opacity: 0 },
   animate: { opacity: 1 },
@@ -119,6 +119,23 @@ function MainPage() {
           state={{ modalTitle: 'Create new habit' }}
         />
       )}
+      {/* Bottom Fixed Image */}
+      <Link to="/chatboat">
+<img
+  src={RobotImg}
+  alt="fixed"
+  style={{
+    position: "fixed",
+    bottom: "50px",
+    right: "40px",
+    width: "80px",
+    zIndex: 1000,
+    borderRadius: "50%",
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+    cursor: "pointer"
+  }}
+/>
+</Link>
     </motion.div>
   );
 }

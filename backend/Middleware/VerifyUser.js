@@ -1,7 +1,8 @@
 import jwt from "jsonwebtoken";
-import User from "../Model/User.js";
+import {User} from "../db/dbConnection.js";
 export const VerifyMiddleware = async (req, res, next) => {
   const authHeader = req.headers["authorization"]; // "Bearer token"
+  
   if (!authHeader) {
     return res.status(401).json({ message: "No token provided" });
   }
@@ -12,8 +13,20 @@ export const VerifyMiddleware = async (req, res, next) => {
   }
 
   try {
+    console.log("Verifying token:", token);
     const decoded = jwt.verify(token, process.env.JWT);
-     req.user = await User.findById(decoded.id).select("_id email"); // <- ये जरूरी है
+    console.log("Decoded token:", decoded.id);
+   
+     const user = await User.findByPk(decoded.id, {
+  attributes: ["id", "email"]
+});
+
+if (!user) {
+  return res.status(401).json({ message: "User not found" });
+}
+
+req.user = user;
+console.log("Verified user:", req.user.id);
     next();
   } catch (err) {
     return res.status(401).json({ message: "Token is not valid" });
