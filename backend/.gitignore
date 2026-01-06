@@ -9,12 +9,15 @@
 /coverage
 #ignoring env file
 backend/.env
+#read me file
+backend/Read.md
 
 # production
 /build
 
 # misc
 .DS_Store
+
 .env.local
 .env.development.local
 .env.test.local

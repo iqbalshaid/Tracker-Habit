@@ -25,3 +25,10 @@ const createUserModel=(sequelize)=>{
 }
 
 export default createUserModel;
+//jab class wala model banta hai toh 
+// export type AttendanceCreationAttributes = Optional<
+//   AttendanceAttributes,
+//   "attendanceId" | "status" | "workingHours" | "createdAt" | "updatedAt"
+// >;
+//jo optional hai uska matlab ye hota hai ki jab hum ye model ko backend ke create karenge toh "or" logic me jo name 
+// hai agar oh create ke time nhi vhi rehega toh vhi ye model backend me create hoga
