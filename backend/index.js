@@ -1,3 +1,4 @@
+import { initializeTelemetry } from "./telementry-init.js";
 import express from "express";
 import dotenv from "dotenv"
 import mongoose from "mongoose";
@@ -10,6 +11,7 @@ import "./Middleware/redisClient.js"
 import chatBoat from "./Routes/chatBoat.js";
 
 dotenv.config();
+initializeTelemetry()
 const app = express();
 app.use(express.json());
 app.use(express.static('public'))
