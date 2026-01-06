@@ -32,6 +32,7 @@ const habitgetbyUserId = async (req, res) => {
 // Create habit
 const posthabit = async (req, res) => {
   try {
+
     const { title, name, frequency, colorIndex, iconTitle, order, isArchived, completedDays } = req.body;
 
     const habit = new Habits({ userId: req.user.id, title, name, frequency, colorIndex, iconTitle, order, isArchived, completedDays });
