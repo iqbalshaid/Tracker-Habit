@@ -1,4 +1,4 @@
-version:"3.8"
+version: "3.8"
 
 services:
   redis:
@@ -27,14 +27,28 @@ services:
       - mongo_data:/data/db
     networks:
       - apnatrack-network
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: Tracker-otel-collector
+    restart: unless-stopped
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "8888:8888"
+      - "8889:8889"
+    volumes:
+      - ./otel.yml:/etc/otelcol-contrib/otel-collector.yaml
+    command: ["--config=/etc/otelcol-contrib/otel-collector.yaml"]
+    networks:
+      - apnatrack-network
+
 volumes:
   redis_data:
     driver: local
-  mongo:
+  mongo_data:
     driver: local
 
 networks:
   apnatrack-network:
     driver: bridge
-    
- 
