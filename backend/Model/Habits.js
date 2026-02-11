@@ -1,19 +1,77 @@
-import mongoose from "mongoose";
-const habitSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  title: { type: String, required: true },
-  Name: { type: String, required: true },
-  frequency: { type: Number, min: 1, max: 7, default: 1 },
-  colorIndex: { type: Number, default: 0 },
-  iconTitle: { type: String, default: "default" },
-  order: { type: Number },
-  isArchived: { type: Boolean, default: false },
-  completedDays: [
+import { DataTypes } from "sequelize";
+
+const createHabitModel = (sequelize) => {
+  const Habit = sequelize.define(
+    "Habit",
     {
-      date: { type: Date, required: true },
-      completed: { type: Boolean, default: true },
+      id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+      },
+
+      userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: "Users", // table name
+          key: "id",
+        },
+        onDelete: "CASCADE",
+      },
+
+      title: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+
+      frequency: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 1,
+        validate: {
+          min: 1,
+          max: 7,
+        },
+      },
+
+      colorIndex: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+      },
+
+      iconTitle: {
+        type: DataTypes.STRING,
+        defaultValue: "default",
+      },
+
+      order: {
+        type: DataTypes.INTEGER,
+      },
+
+      isArchived: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
+
+      // Mongo completedDays array → PostgreSQL JSONB
+      completedDays: {
+        type: DataTypes.JSONB,
+        defaultValue: [],
+      },
     },
-  ],
-  createdAt: { type: Date, default: Date.now },
-});
-export default mongoose.models.Habits || mongoose.model("Habit", habitSchema);
+    {
+      tableName: "Habits",
+      timestamps: true, // createdAt, updatedAt
+    }
+  );
+
+  return Habit;
+};
+
+export default createHabitModel;
