@@ -1,10 +1,14 @@
-import Habits from "../Model/Habits.js";
+import { Habit } from "../db/dbConnection.js";
 import  logger  from "../Middleware/logger.js";
 
 // Get all habits
 const habitsget = async (req, res) => {
   try {
-    const habits = await Habits.find({ userId: req.user.id }).sort({ order: 1 });
+    const habits = await Habit.findAll({
+      where: { userId: req.user.id },
+      order: [["order", "ASC"]],
+    });
+
     logger.infoWithContext("Fetched all habits", req, { userId: req.user.id });
     res.json(habits);
   } catch (error) {
@@ -13,15 +17,21 @@ const habitsget = async (req, res) => {
   }
 };
 
+
 // Get habit by ID
 const habitgetbyUserId = async (req, res) => {
   try {
-    const habit = await Habits.findOne({ _id: req.params.id, userId: req.user.id });
+    const habit = await Habit.findOne({
+      where: {
+        id: req.params.id,
+        userId: req.user.id,
+      },
+    });
+
     if (!habit) {
-      logger.warnWithContext("Habit not found", req, { habitId: req.params.id });
       return res.status(404).json({ message: "Habit not found" });
     }
-    logger.infoWithContext("Fetched habit by ID", req, { habitId: habit._id });
+
     res.json(habit);
   } catch (error) {
     logger.errorWithContext("Error fetching habit", error, req);
@@ -32,13 +42,34 @@ const habitgetbyUserId = async (req, res) => {
 // Create habit
 const posthabit = async (req, res) => {
   try {
+    const {
+      title,
+      name,
+      frequency,
+      colorIndex,
+      iconTitle,
+      order,
+      isArchived,
+      completedDays,
+    } = req.body;
 
-    const { title, name, frequency, colorIndex, iconTitle, order, isArchived, completedDays } = req.body;
+    const habit = await Habit.create({
+      userId: req.user.id,
+      title,
+      name,
+      frequency,
+      colorIndex,
+      iconTitle,
+      order,
+      isArchived,
+      completedDays,
+    });
 
-    const habit = new Habits({ userId: req.user.id, title, name, frequency, colorIndex, iconTitle, order, isArchived, completedDays });
-    await habit.save();
+    logger.infoWithContext("Habit created successfully", req, {
+      habitId: habit.id,
+      userId: req.user.id,
+    });
 
-    logger.infoWithContext("Habit created successfully", req, { habitId: habit._id, userId: req.user.id });
     res.status(201).json(habit);
   } catch (error) {
     logger.errorWithContext("Error creating habit", error, req);
@@ -46,28 +77,41 @@ const posthabit = async (req, res) => {
   }
 };
 
+
+
 // Update habit
 const updateHabit = async (req, res) => {
   try {
-    const habitId = req.params.id;
-    const habit = await Habits.findOne({ _id: habitId, userId: req.user.id });
+    const habit = await Habit.findOne({
+      where: {
+        id: req.params.id,
+        userId: req.user.id,
+      },
+    });
+
     if (!habit) {
-      logger.warnWithContext("Habit not found", req, { habitId });
       return res.status(404).json({ message: "Habit not found" });
     }
 
-    if (!Array.isArray(habit.completedDays)) habit.completedDays = [];
+    let completedDays = habit.completedDays || [];
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const index = habit.completedDays.findIndex(cd => new Date(cd.date).getTime() === today.getTime());
-    if (index >= 0) habit.completedDays.splice(index, 1);
-    else habit.completedDays.push({ date: today, completed: true });
+    const index = completedDays.findIndex(
+      (cd) => new Date(cd.date).getTime() === today.getTime()
+    );
 
+    if (index >= 0) {
+      completedDays.splice(index, 1);
+    } else {
+      completedDays.push({ date: today, completed: true });
+    }
+
+    habit.completedDays = completedDays;
     await habit.save();
 
-    logger.infoWithContext("Habit updated", req, { habitId });
+    logger.infoWithContext("Habit updated", req, { habitId: habit.id });
     res.json(habit);
   } catch (error) {
     logger.errorWithContext("Error updating habit", error, req);
@@ -78,8 +122,17 @@ const updateHabit = async (req, res) => {
 // Delete habit
 const deleteHabit = async (req, res) => {
   try {
-    await Habits.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
-    logger.infoWithContext("Habit deleted", req, { habitId: req.params.id });
+    const deleted = await Habit.destroy({
+      where: {
+        id: req.params.id,
+        userId: req.user.id,
+      },
+    });
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Habit not found" });
+    }
+
     res.json({ message: "Habit deleted" });
   } catch (error) {
     logger.errorWithContext("Error deleting habit", error, req);
@@ -87,11 +140,14 @@ const deleteHabit = async (req, res) => {
   }
 };
 
+
 // Delete all habits
 const AlldeleteHabit = async (req, res) => {
   try {
-    await Habits.deleteMany({ userId: req.user.id });
-    logger.infoWithContext("All habits deleted", req, { userId: req.user.id });
+    await Habit.destroy({
+      where: { userId: req.user.id },
+    });
+
     res.json({ message: "All habits deleted" });
   } catch (error) {
     logger.errorWithContext("Error deleting all habits", error, req);
@@ -99,14 +155,24 @@ const AlldeleteHabit = async (req, res) => {
   }
 };
 
+
 // Archive habit
 const archieve = async (req, res) => {
   try {
     const { id } = req.params;
     const { archive } = req.body;
 
-    const habit = await Habits.findByIdAndUpdate(id, { isArchived: archive }, { new: true });
-    logger.infoWithContext("Habit archive status updated", req, { habitId: id, archive });
+    const habit = await Habit.findOne({
+      where: { id, userId: req.user.id },
+    });
+
+    if (!habit) {
+      return res.status(404).json({ message: "Habit not found" });
+    }
+
+    habit.isArchived = archive;
+    await habit.save();
+
     res.json(habit);
   } catch (error) {
     logger.errorWithContext("Error archiving habit", error, req);
@@ -114,4 +180,14 @@ const archieve = async (req, res) => {
   }
 };
 
-export { habitsget, habitgetbyUserId, posthabit, updateHabit, deleteHabit, AlldeleteHabit, archieve };
+
+export {
+  habitsget,
+  habitgetbyUserId,
+  posthabit,
+  updateHabit,
+  deleteHabit,
+  AlldeleteHabit,
+  archieve,
+};
+

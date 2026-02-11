@@ -15,18 +15,20 @@ services:
     networks:
       - apnatrack-network
 
-  mongo:
-    image: mongo:6
-    container_name: Tracker
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
-    environment:
-      MONGO_URL: "mongodb+srv://shahidiqbal63209:Shahid786@cluster0.lbxy9hu.mongodb.net/Tracker?retryWrites=true&w=majority"
-    volumes:
-      - mongo_data:/data/db
-    networks:
-      - apnatrack-network
+  postgres:
+      image: postgres:15-alpine
+      container_name: apnatrack-postgres
+      restart: unless-stopped
+      ports:
+        - "5432:5432"
+      environment:
+        POSTGRES_DB: shahid
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: shahid
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+      networks:
+        - apnatrack-network
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
@@ -46,7 +48,7 @@ services:
 volumes:
   redis_data:
     driver: local
-  mongo_data:
+  postgres_data:
     driver: local
 
 networks:

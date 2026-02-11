@@ -130,10 +130,20 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Logout
-  const logout = () => {
-    localStorage.removeItem("token");
-    setUser(null);
-    setShouldRedirect(false);
+  const logout = async () => {
+    
+    if (!token) throw new Error("No token found");
+    try {
+      await axios.delete(`http://localhost:5000/logout`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      localStorage.removeItem("token");
+       setUser(null);
+       setShouldRedirect(false);;
+    } catch (err) {
+      console.error("Logout account error:", err);
+      throw err;
+    }
   };
 
   // Reset redirect flag

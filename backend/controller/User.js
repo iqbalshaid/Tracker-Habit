@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { User } from "../db/dbConnection.js";
 import logger from "../Middleware/logger.js";
-
+import { isRedisConnected,setWithExpiry,sadd,srem,del } from "../Middleware/redisClient.js";
 // SignUp
 const SignUp = async (req, res) => {
   try {
@@ -52,7 +52,17 @@ const SignIn = async (req, res) => {
     }
 
     const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT, { expiresIn: "7d" });
+    if (isRedisConnected()) {
+    // store active token
+    await sadd(`user:${user.id}:tokens`, token);
 
+    // store session info
+    await setWithExpiry(
+      `user:${user.id}:session`,
+      JSON.stringify({ loginAt: Date.now() }),
+      3600
+    );
+  }
     logger.infoWithContext("User logged in", req, { email, userId: user.id });
 
     res.status(200).json({ user: { id: user.id, email: user.email }, token });
@@ -135,5 +145,47 @@ const getUserData = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+//Logout function
+ const Logout = async (req, res) => {
+  try {
+    const authHeader = req.headers["authorization"];
 
-export { SignIn, SignUp, Delete, UpdatePassword, verify, getUserData };
+    if (!authHeader) {
+      return res.status(400).json({ message: "Authorization header missing" });
+    }
+
+    const token = authHeader.split(" ")[1];
+    if (!token) {
+      return res.status(400).json({ message: "Invalid token format" });
+    }
+
+    const decoded = jwt.decode(token);
+    if (!decoded || !decoded.exp || !decoded.id) {
+      return res.status(400).json({ message: "Invalid token" });
+    }
+
+    const ttl = decoded.exp - Math.floor(Date.now() / 1000);
+
+    if (isRedisConnected() && ttl > 0) {
+      // blacklist token
+      await setWithExpiry(`blacklist:${token}`, "true", ttl);
+
+      //remove from active sessions
+      await srem(`user:${decoded.id}:tokens`, token);
+
+      // remove session info
+      await del(`user:${decoded.id}:session`);
+    }
+
+    return res.json({ message: "Logged out successfully" });
+
+  } catch (error) {
+    logger.errorWithContext("Logout failed", error, req);
+
+    return res
+      .status(500)
+      .json({ message: "Logout failed, please try again" });
+  }
+};
+
+export { SignIn, SignUp, Delete, UpdatePassword, verify, getUserData,Logout };

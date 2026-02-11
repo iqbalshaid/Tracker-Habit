@@ -1,51 +1,43 @@
 import { initializeTelemetry } from "./telementry-init.js";
 import express from "express";
-import dotenv from "dotenv"
-import mongoose from "mongoose";
+import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+
 import Userroute from "./Routes/Userroute.js";
 import Habitroute from "./Routes/Habitroute.js";
-import { dbConnection } from "./db/dbConnection.js";
-import "./Middleware/redisClient.js"
 import chatBoat from "./Routes/chatBoat.js";
+import { dbConnection } from "./db/dbConnection.js";
 
 dotenv.config();
-initializeTelemetry()
+initializeTelemetry();
+
 const app = express();
+
 app.use(express.json());
-app.use(express.static('public'))
+app.use(express.static("public"));
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(cors());
 
-const PORT = process.env.PORT||5000; // Change the port number here
+const PORT = process.env.PORT || 5000;
 
-app.get('/', (req, res) => {
-    res.send('Hello World!');
-  });
-const conect = ()=>{
-         
-         mongoose.connect(process.env.MONGO_URL,{
-            //useNewUrlParser:true,
-            useUnifiedTopology:true,
-            
-        }).then(()=>
-        console.log("database was connected"))
-    .catch((err)=>{
-        console.log("database was disconnected");
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
 
-    })
-}
- // Call the connection function
-conect();
-dbConnection("shahid","postgres","shahid");
+// ✅ PostgreSQL connection only (Sequelize)
+await dbConnection(
+  process.env.DB_NAME || "shahid",
+  process.env.DB_USER || "postgres",
+  process.env.DB_PASSWORD || "shahid"
+);
 
-app.use("",Userroute);
-app.use("",Habitroute);
-app.use("",chatBoat);
+// routes
+app.use("", Userroute);
+app.use("", Habitroute);
+app.use("", chatBoat);
+
 app.listen(PORT, () => {
-    conect();
-    dbConnection("shahid","postgres","shahid");
-    console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
